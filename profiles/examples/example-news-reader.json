@@ -1,0 +1,41 @@
+{
+  "format": "fauxx-app-profile/0",
+  "app": {
+    "package": "org.example.newsreader",
+    "category": "news",
+    "invasiveness": "low"
+  },
+  "provenance": {
+    "app_version": "0.0.0-example",
+    "signer_sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+    "captured_on": "2026-11-11",
+    "method": "synthetic-example",
+    "synthetic": true
+  },
+  "sessions": {
+    "per_day": { "min": 1, "max": 4 },
+    "minutes": { "min": 2, "max": 12 }
+  },
+  "phases": [
+    {
+      "name": "launch",
+      "hosts": [
+        { "kind": "first-party-api", "domain": "example.org" },
+        { "kind": "crash-reporting" }
+      ],
+      "requests": { "min": 2, "max": 5 },
+      "kilobytes": { "min": 10, "max": 60 },
+      "gap_seconds": { "min": 0, "max": 2 }
+    },
+    {
+      "name": "read-articles",
+      "hosts": [
+        { "kind": "first-party-content", "domain": "example.org" },
+        { "kind": "cdn", "domain": "example.net" }
+      ],
+      "requests": { "min": 5, "max": 40 },
+      "kilobytes": { "min": 200, "max": 3000 },
+      "gap_seconds": { "min": 15, "max": 120 }
+    }
+  ]
+}

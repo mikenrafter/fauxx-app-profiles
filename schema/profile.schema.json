@@ -1,0 +1,92 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/mikenrafter/fauxx-app-profiles/schema/profile.schema.json",
+  "title": "App behavior profile (draft 0)",
+  "description": "Declarative summary of how an Android app uses the network. Data only: no code, payloads, headers or identifiers.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["format", "app", "provenance", "sessions", "phases"],
+  "properties": {
+    "format": { "const": "fauxx-app-profile/0" },
+    "app": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["package", "category", "invasiveness"],
+      "properties": {
+        "package": { "type": "string", "pattern": "^[a-zA-Z][a-zA-Z0-9_]*(\\.[a-zA-Z][a-zA-Z0-9_]*)+$" },
+        "category": { "enum": ["game", "audio", "video", "image", "social", "news", "maps", "productivity", "shopping", "finance", "health", "other"] },
+        "invasiveness": {
+          "description": "low: few permissions and trackers; high: broad permissions or heavy tracking SDKs. High profiles must use host categories only.",
+          "enum": ["low", "medium", "high"]
+        }
+      }
+    },
+    "provenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["app_version", "signer_sha256", "captured_on", "method", "synthetic"],
+      "properties": {
+        "app_version": { "type": "string", "maxLength": 64 },
+        "signer_sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+        "captured_on": { "type": "string", "format": "date" },
+        "method": { "enum": ["emulator", "isolated-profile", "synthetic-example"] },
+        "synthetic": { "type": "boolean", "description": "true for format examples that do not describe a real app" }
+      }
+    },
+    "sessions": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["per_day", "minutes"],
+      "properties": {
+        "per_day": { "$ref": "#/$defs/range" },
+        "minutes": { "$ref": "#/$defs/range" }
+      }
+    },
+    "phases": {
+      "description": "Ordered steps of a typical session.",
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 32,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["name", "hosts", "requests", "kilobytes", "gap_seconds"],
+        "properties": {
+          "name": { "type": "string", "pattern": "^[a-z][a-z0-9-]{0,31}$" },
+          "hosts": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 16,
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["kind"],
+              "properties": {
+                "kind": { "enum": ["first-party-api", "first-party-content", "cdn", "analytics", "ads", "crash-reporting", "push", "auth", "other"] },
+                "domain": {
+                  "description": "Registrable domain only, no subdomain paths or query strings. Omitted for invasiveness=high.",
+                  "type": "string",
+                  "pattern": "^([a-z0-9-]+\\.)+[a-z]{2,}$"
+                }
+              }
+            }
+          },
+          "requests": { "$ref": "#/$defs/range" },
+          "kilobytes": { "$ref": "#/$defs/range" },
+          "gap_seconds": { "$ref": "#/$defs/range" }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "range": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["min", "max"],
+      "properties": {
+        "min": { "type": "number", "minimum": 0 },
+        "max": { "type": "number", "minimum": 0 }
+      }
+    }
+  }
+}
